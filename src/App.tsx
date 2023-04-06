@@ -5,7 +5,22 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 
 const createUserFormSchema = z.object({
-  email: z.string().email("Formato de e-mail inválido").nonempty("Email é obrigatório"),
+  name: z
+    .string()
+    .nonempty("Nome é obrigatório")
+    .transform((name) =>
+      name
+        .trim()
+        .split(" ")
+        .map((word) => word[0].toLocaleUpperCase().concat(word.substring(1)))
+        .join(" ")
+    ),
+  email: z
+    .string()
+    .email("Formato de e-mail inválido")
+    .nonempty("Email é obrigatório")
+    .toLowerCase()
+    .refine((email) => email.endsWith("@test.com"), "O email precisa terminar em @test.com"),
   password: z.string().min(6, "Senha deve ter pelo menos 6 caracteres"),
 });
 
@@ -31,13 +46,18 @@ function App() {
     <main className="h-screen bg-zinc-950 text-zinc-300 flex flex-col gap-10 items-center justify-center">
       <form action="" onSubmit={handleSubmit(createUser)} className="flex flex-col gap-4 w-full max-w-xs">
         <div className="flex flex-col gap-1">
-          <label htmlFor="">Email</label>
+          <label htmlFor="name">Name</label>
+          <input type="name" className="border border-zinc-800 shadow-sm rounded h-10 px-3 bg-zinc-800 text-white" {...register("name")} />
+          {errors.name && <span>{errors.name.message}</span>}
+        </div>
+        <div className="flex flex-col gap-1">
+          <label htmlFor="email">Email</label>
           <input type="email" className="border border-zinc-800 shadow-sm rounded h-10 px-3 bg-zinc-800 text-white" {...register("email")} />
           {errors.email && <span>{errors.email.message}</span>}
         </div>
 
         <div className="flex flex-col gap-1">
-          <label htmlFor="">Password</label>
+          <label htmlFor="password">Password</label>
           <input type="password" className="border border-zinc-800 shadow-sm rounded h-10 px-3 bg-zinc-800 text-white" {...register("password")} />
           {errors.password && <span>{errors.password.message}</span>}
         </div>
